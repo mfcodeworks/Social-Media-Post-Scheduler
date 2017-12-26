@@ -7,7 +7,7 @@
  /* Generic functions            */
  function headerLocation($location)
 {
-    printJS("window.location.replace(\"$location\");");
+    header("Location: ".$location);
 };
 // Print any errors as Javascript alert
 function printError($error)
@@ -19,12 +19,21 @@ function printJS($js) {
 
         echo "<script type='text/javascript'>$js</script>";
 };
+// console.log() for JS
+function consoleLog(string $log) {
+    printJS("console.log($log);");
+};
 // Return todays date as yyyy-mm-dd
 function getDateNow()
 {
     //Get Date
-    date_default_timezone_set('Australia/Brisbane');
-    $date = date('Y-m-d', time());
+    $date = date('c', time());
+    return $date;
+};
+// Get date in ISO-8601
+function getDateISO($date)
+{
+    $returnDate = date('c',strtotime($date));
     return $date;
 };
 // Create a new SQL Connection (Don't forget to close in function!)
@@ -33,7 +42,7 @@ function sqlConnect()
     $server="localhost";
     $user="nygmaros_Musa";
     $pass="sch@@l12";
-    $db="nygmaros_restaurant-order";
+    $db="nygmaros_social-media-post";
     //Connect to DB
     $conn = mysqli_connect($server, $user, $pass, $db);
     //Set charset for query
@@ -41,6 +50,107 @@ function sqlConnect()
     //Alert if connection failed
     if (!$conn) die(printError("Database Connection Failed"));
     return $conn;
+};
+
+/* Photo upload functions        */
+//Check valid image for uploading
+function checkUploadImage($name,$tmpName)
+{
+    //Check count files
+    if(!isset($tmpName)) return false;
+    else {
+        //Upload check var
+        $uploadCheck = 1;
+        //Current target file
+        $baseName = basename($name);
+        //Get file type
+        $fileType = pathinfo($baseName,PATHINFO_EXTENSION);
+        // Check if image file is an actual image or fake image
+        $check = getimagesize($tmpName);
+        if($check != false) {
+            echo "File is an image - " . $check["mime"] . ".\n\n";
+            $uploadCheck = 1;
+        }
+        else {
+            echo "File is not an image.";
+            $uploadCheck = 0;
+        }
+        // Allow certain file formats
+        if($fileType != "jpg" && $fileType != "png" && $fileType != "jpeg" && $fileType != "gif" ) {
+            echo "Only JPG, JPEG, PNG & GIF files are allowed.";
+            $uploadCheck = 0;
+        }
+    }
+    return $uploadCheck;
+};
+//Give file unique name
+function getUniqueName($target)
+{
+    if(isset($target) && $target != '') {
+        //Get file type
+        $fileType = pathinfo($target,PATHINFO_EXTENSION);
+        //Unique file name
+        $newFileName = date('Y-m-d-H-i-s') . '_' . uniqid() . '.' . $fileType;
+        return $newFileName;
+    }
+};
+function getFileTarget($file)
+{
+    $targetNewName = getUniqueName($file);
+    $target = $_SERVER['DOCUMENT_ROOT'] . "Social-Media-Post-Scheduler/img/" . $targetNewName;
+    if(file_exists($target)) $target = getFileTarget($file);
+    return $target;
+};
+//Try to upload/check upload for file
+function uploadFile($source,$target)
+{
+    if (move_uploaded_file($source, $target)) return true;
+    else return false;
+};
+//Convert files to JPEG
+function uploadAsJpeg(string $source,string $target,string $filetype) {
+    //Set file target
+    if($filetype == "png") {
+        $target = str_replace(".png",".jpg",$target);
+        $photo = imagecreatefrompng($source);
+    }
+    else if($filetype == "gif") {
+        $target = str_replace(".gif",".jpg",$target);
+        $photo = imagecreatefromgif($source);
+    }
+    //Get file resource
+    if(imagejpeg($photo,$target,100)) {
+        return $target;
+    }
+    else return null;
+};
+function checkImageMaxSize($imagename,int $max_width=1080,int $max_height=1080) {
+    echo "Check resize\n\n";
+    $image = imagecreatefromjpeg($imagename);
+
+	$w = imagesx($image); //current width
+	$h = imagesy($image); //current height
+	if ((!$w) || (!$h)) { $GLOBALS['errors'][] = 'Image couldn\'t be resized because it wasn\'t a valid image.'; return false; }
+
+	if (($w <= $max_width) && ($h <= $max_height)) { return $image; } //no resizing needed
+
+	//try max width first...
+	$ratio = $max_width / $w;
+	$new_w = $max_width;
+	$new_h = $h * $ratio;
+
+	//if that didn't work
+	if ($new_h > $max_height) {
+		$ratio = $max_height / $h;
+		$new_h = $max_height;
+		$new_w = $w * $ratio;
+	}
+
+    echo "Resizing image\n\n";
+
+	$new_image = imagecreatetruecolor ($new_w, $new_h);
+	imagecopyresampled($new_image,$image, 0, 0, 0, 0, $new_w, $new_h, $w, $h);
+    if(imagejpeg($new_image, $imagename,100)) echo "File resized!\n\n";
 };
 
 /* Login Functions             */
@@ -132,13 +242,6 @@ function setLoggedIn($user)
 {
     //Set logged in and save username for session use
     $_SESSION['username']="$user";
-    //Get admin level
-    $conn = sqlConnect();
-    $sql = "SELECT admin_level FROM users WHERE name = \"$user\";";
-    $result = mysqli_query($conn,$sql);
-    while($row = mysqli_fetch_assoc($result)) $level = $row['admin_level'];
-    mysqli_close($conn);
-    $_SESSION['adminLevel'] = $level;
 };
 
 /* HTML echo functions         */
@@ -148,7 +251,7 @@ function LoginLink()
     //If logged in display username and logout option
     if(isset($_SESSION['username'])) {
         $user = $_SESSION['username'];
-        echo "<a class='nav-link' href='logout.php'>$user, Logout</a>";
+        echo "<a class='nav-link' href='javascript:void(0)' id='logoutLink'>$user, Logout</a>";
     }
     //If not logged in display login option
     else echo '<a class="nav-link" href="login.php">Login</a>';
@@ -202,6 +305,9 @@ function loadNav()
             <li class='nav-item' name='login.php'>";
                 LoginLink();
         echo "</li>
+            <li class='nav-item' name='link-social.php'>
+                <a class='nav-link' href='link-social.php'>Link Social Media Profiles</a>
+            </li>
             </ul>
         </div>
       </div>
@@ -217,32 +323,18 @@ function beginContent()
 //load login page login.php
 function loadLogin()
 {
-    echo "<form action='check-user.php' method='post' style='margin: auto; width: 35%; text-align: center;'>
+    echo "<form action='javascript:void(0)' method='post' style='margin: auto; text-align: center;padding-bottom:9.7em;' id='loginForm'>
         <h1 class='my-4' style='margin: auto; width: 50%; text-align: center;'>Login</h1>
         <div class='form-group' style='list-group-item'>
           <label for='username'>Username</label>
           <input type='text' name='username' class='form-control' id='username'>
         </div>
         <div class='form-group' style='list-group-item'>
-          <label for='password'>Pin</label>
+          <label for='password'>Password</label>
           <input type='password' name='password' class='form-control' id='password'>
         </div>
         <div class='text-center' style='list-group-item'>
           <button type='submit' class='btn btn-primary'><i class='fa fa-sign-in'></i> Log in</button>
-        </div>
-    </form>
-    <form action='check-user.php' method='post' style='margin: auto; width: 35%; text-align: center;'>
-        <h1 class='my-4' style='margin: auto; width: 50%; text-align: center;'>New User</h1>
-        <div class='form-group' style='list-group-item'>
-          <label for='regUser'>New Username</label>
-          <input type='text' name='regUser' class='form-control' id='regUser'>
-        </div>
-        <div class='form-group' style='list-group-item'>
-          <label for='regPassword'>New Pin</label>
-          <input type='password' name='regPassword' class='form-control' id='regPassword'>
-        </div>
-        <div class='text-center' style='list-group-item'>
-          <button type='submit' class='btn btn-primary'><i class='fa fa-sign-in'></i> Register</button>
         </div>
     </form>";
 };
@@ -253,9 +345,10 @@ function loadFoot()
         <!-- /.row -->
         </div>
         <!-- Footer -->
-        <footer class='py-5 bg-dark' style='position: absolute; right: 0; bottom: 0; left: 0; padding: 1rem; text-align: center;'>
+        <footer class='py-5 bg-dark' style='position: relative; right: 0; bottom: 0; left: 0; padding: 1rem; text-align: center;'>
             <div class='container'>
                 <p class='m-0 text-center text-white'>Copyright &copy; MF Apps &amp; Web 2017</p>
+                <p><a href='privacy-policy.php' style='color:black;'>Privacy Policy</a>
             </div>
         <!-- /.container -->
         </footer>

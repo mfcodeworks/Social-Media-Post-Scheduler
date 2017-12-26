@@ -6,25 +6,6 @@
  // On document fully loaded, run the following
 $(document).ready(function(){
 
-	/*** FACEBOOK LOGIN API BEGIN ***/
-  window.fbAsyncInit = function() {
-    FB.init({
-      appId      : '325572871258177',
-      cookie     : true,
-      xfbml      : true,
-      version    : '2.11'
-    });
-    FB.AppEvents.logPageView();
-  };
-  (function(d, s, id){
-     var js, fjs = d.getElementsByTagName(s)[0];
-     if (d.getElementById(id)) {return;}
-     js = d.createElement(s); js.id = id;
-     js.src = "https://connect.facebook.net/en_US/sdk.js";
-     fjs.parentNode.insertBefore(js, fjs);
-   }(document, 'script', 'facebook-jssdk'));
-   /*** FACEBOOK LOGIN API END ***/
-
 	// On selecting Twitter, check character limit
     $('#platformTwitter').change(function() {
 		if(this.checked && $('#postText').val().length > 280)
@@ -32,6 +13,28 @@ $(document).ready(function(){
 		else if($('#postText').hasClass('has-warning'))
 				noTwitterWarning($('#postText'));
 	});
+
+    // On selecting Facebook, get place to send
+    $('#platformFacebook').change(function() {
+        if(this.checked) {
+            $('#postRow3').after("<div class='col-lg-12' id='postRow7'><div class='form-group'><label for='fbPerson' style='margin-top:2em;'><i class='fa fa-user'></i>&nbsp;Facebook ID (For your own profile type 'me', for a Facebook page enter what comes after 'www.facebook.com/' for your Facebook page. e.g. 'mfappsandweb')</label><input type='text' class='form-control' id='fbPerson' name='fbPerson' placeholder='me'></div></div>");
+        }
+        else {
+            $('#postRow7').remove();
+        }
+    });
+
+    // On selecing Instagram, offer login field for IG
+    $('#platformInstagram').change(function() {
+        if(this.checked) {
+            $('#postRow3').after("<div class='col-lg-12' style='margin-bottom:-25px;' id='igInfoP'><p><i class='fa fa-exclamation-circle'></i>&nbsp;Our Instagram API requires login details to be entered for posting (These will not be saved.)</p></div><div class='col-md-6' id='postRow4'><div class='form-group'><label for='igUser' style='margin-top:2em;'><i class='fa fa-user'></i>&nbsp;Instagram Username: </label><input type='text' class='form-control' id='igUser' name='igUser'></div></div><div class='col-md-6' id='postRow5'><div class='form-group'><label for='igPassword' style='margin-top:2em;'><i class='fa fa-lock'>&nbsp;Instagram Password: </label></i>&nbsp;<input type='password' class='form-control' id='igPassword' name='igPassword'></div></div>")
+        }
+        else {
+            $('#postRow4').remove();
+            $('#postRow5').remove();
+            $('#igInfoP').remove();
+        }
+    });
 
 	// When post text change, check for any Twitter limit breach
 	$('#postText').change(function() {
@@ -53,9 +56,15 @@ $(document).ready(function(){
         console.log('Post Sent\n\n');
         var form = new FormData($('#platformPost')[0]);
 		if($('#platformTwitter').prop('checked')) form.append("platformTwitter","1");
+        else form.append("platformTwitter","0");
 		if($('#platformFacebook').prop('checked')) form.append("platformFacebook","1");
+        else form.append("platformFacebook","0");
+		if($('#platformInstagram').prop('checked')) form.append("platformInstagram","1");
+        else form.append("platformInstagram","0");
+		if($('#platformLinkedin').prop('checked')) form.append("platformLinkedin","1");
+        else form.append("platformLinkedin","0");
         $.ajax({
-            url: "scripts/process-post.php",
+            url: "process-post.php",
             method: "POST",
             data: form,
             processData: false,
@@ -66,6 +75,50 @@ $(document).ready(function(){
             }
         });
 	});
+
+    //Register user
+    $('#registerUserForm').submit(function() {
+        $.post('check-user.php',
+        {
+            regUser: $('#regUser').val(),
+            regPassword: $('#regPassword').val()
+        },
+        function(data,status) {
+            console.log(data);
+            if(data == "true") window.location.replace('index.php');
+            else window.location.replace('admin.php?error=username-taken');
+        });
+    });
+
+    $('#logoutLink').click(function() {
+        $.get('logout.php', function(data,status) {
+            if(data == "true") location.reload();
+        });
+    });
+
+    $('#loginForm').submit(function() {
+        $.post('check-user.php',
+        {
+            username: $('#username').val(),
+            password: $('#password').val()
+        },
+        function(data,status) {
+            console.log(data);
+            if(data == 'true') window.location.replace('index.php');
+            else window.location.replace('login.php?error=login-incorrect');
+        });
+    });
+
+    //Save LinkedIn Business Choice
+    $('#linkedinBusinessChoice').click(function() {
+        $.post('save-linkedin-choice.php',
+        {
+            business: $('#LinkedInBusiness').val()
+        },
+        function(data,status) {
+            console.log(data);
+        });
+    });
 });
 
 // Twitter warning functions
