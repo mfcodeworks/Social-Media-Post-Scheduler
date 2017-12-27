@@ -1,6 +1,6 @@
 <?php
     session_start();
-    include 'scripts/functions.php';
+    include 'functions.php';
     if(!isset($_SESSION['username'])) headerLocation('login.php');
 	loadHead();
     loadNav();
@@ -48,7 +48,7 @@
 				<div class='row'>
 					<div class='col-md-12' style='padding-right:0em;' id='postRow1'>
                 		<div class='form-group' id='postTextformGroup'>
-                			<label for='postText'>Social Media Post Text:</label>
+                			<label for='postText'><i class='fa fa-book'></i>&nbsp;Social Media Post Text:</label>
                     		<textarea class='form-control' id='postText' name='postText' rows='10'></textarea>
                 		</div>
 					</div>
@@ -64,6 +64,18 @@
                     		<input type='file' class='form-control' id='postPhoto' name='postPhoto' style='display:none;'>
                 		</div>
 					</div>
+                    <div class='col-md-12'>
+                		<div class='form-group'>
+                			<label for='postTimezone'><i class='fa fa-clock-o'></i>&nbsp;Set Timezone</label>
+                    		<select id='postTimezone' name='postTimezone' class='form-control'>
+                                <?php
+                                $zones = timezone_list();
+                                foreach($zones as $z => $t)
+                                    echo "<option value='$z'>$t</option>";
+                                ?>
+                            </select>
+                		</div>
+                    </div>
 					<div class='col-md-12'>
                 		<div class='form-group'>
                     		<button type='submit' class='btn btn-primary'>Submit</button>

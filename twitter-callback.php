@@ -1,6 +1,6 @@
 <?php
     session_start();
-    include 'scripts/functions.php';
+    include 'functions.php';
     require 'vendor/autoload.php';
     use Abraham\TwitterOAuth\TwitterOAuth;
 

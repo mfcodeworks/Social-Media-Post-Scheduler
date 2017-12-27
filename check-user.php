@@ -1,7 +1,7 @@
 <?php
     session_start();
     extract($_POST);
-    include 'scripts/functions.php';
+    include 'functions.php';
     //If registering user
     if(isset($regUser))
     {

@@ -1,7 +1,7 @@
 <?php
     session_start();
     require_once "vendor/autoload.php";
-    require_once "scripts/functions.php";
+    require_once "functions.php";
 
     use LinkedIn\AccessToken;
     use LinkedIn\Client;

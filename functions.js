@@ -17,7 +17,7 @@ $(document).ready(function(){
     // On selecting Facebook, get place to send
     $('#platformFacebook').change(function() {
         if(this.checked) {
-            $('#postRow3').after("<div class='col-lg-12' id='postRow7'><div class='form-group'><label for='fbPerson' style='margin-top:2em;'><i class='fa fa-user'></i>&nbsp;Facebook ID (For your own profile type 'me', for a Facebook page enter what comes after 'www.facebook.com/' for your Facebook page. e.g. 'mfappsandweb')</label><input type='text' class='form-control' id='fbPerson' name='fbPerson' placeholder='me'></div></div>");
+            $('#postRow3').after("<div class='col-lg-12' id='postRow7'><div class='form-group'><label for='fbPerson' style='margin-top:2em;'><i class='fa fa-user'></i>&nbsp;Facebook ID (For your own profile type 'me', for a Facebook page enter what comes after 'www.facebook.com/' for your Facebook page. e.g. 'mfappsandweb'). Currently Facebook hasn't granted permission for page posting, this will be updated when this ability is available.</label><input type='text' class='form-control' id='fbPerson' name='fbPerson' placeholder='me'></div></div>");
         }
         else {
             $('#postRow7').remove();
@@ -27,12 +27,14 @@ $(document).ready(function(){
     // On selecing Instagram, offer login field for IG
     $('#platformInstagram').change(function() {
         if(this.checked) {
-            $('#postRow3').after("<div class='col-lg-12' style='margin-bottom:-25px;' id='igInfoP'><p><i class='fa fa-exclamation-circle'></i>&nbsp;Our Instagram API requires login details to be entered for posting (These will not be saved.)</p></div><div class='col-md-6' id='postRow4'><div class='form-group'><label for='igUser' style='margin-top:2em;'><i class='fa fa-user'></i>&nbsp;Instagram Username: </label><input type='text' class='form-control' id='igUser' name='igUser'></div></div><div class='col-md-6' id='postRow5'><div class='form-group'><label for='igPassword' style='margin-top:2em;'><i class='fa fa-lock'>&nbsp;Instagram Password: </label></i>&nbsp;<input type='password' class='form-control' id='igPassword' name='igPassword'></div></div>")
+            $('#postRow2').before("<div class='col-lg-12' id='igPostRules'><p><i class='fa fa-exclamation-circle'></i>&nbsp;If photo width or height is above 1080 pixels, photo will be scaled down. Photo ratios must also be between 0.800 and 1.910 according to Instagram posting rules.</p></div>");
+            $('#postRow3').after("<div class='col-lg-12' style='margin-bottom:-25px;' id='igInfoP'><p><i class='fa fa-exclamation-circle'></i>&nbsp;Our Instagram API requires login details to be entered for posting (These will not be saved unless post is scheduled for future publishing. If they are saved they will be deleted immidiately upon posting.)</p></div><div class='col-md-6' id='postRow4'><div class='form-group'><label for='igUser' style='margin-top:2em;'><i class='fa fa-user'></i>&nbsp;Instagram Username: </label><input type='text' class='form-control' id='igUser' name='igUser'></div></div><div class='col-md-6' id='postRow5'><div class='form-group'><label for='igPassword' style='margin-top:2em;'><i class='fa fa-lock'>&nbsp;Instagram Password: </label></i>&nbsp;<input type='password' class='form-control' id='igPassword' name='igPassword'></div></div>");
         }
         else {
             $('#postRow4').remove();
             $('#postRow5').remove();
             $('#igInfoP').remove();
+            $('#igPostRules').remove();
         }
     });
 
@@ -53,7 +55,11 @@ $(document).ready(function(){
 	// Post content with AJAX
 	$('#platformPost').submit(function(e) {
         e.preventDefault();
-        console.log('Post Sent\n\n');
+
+        $('nav').after("<div id='loader' style='width:100%;height:100%;position:fixed;background:rgba(0,0,0,.5) url(ajax-loader.svg) center center no-repeat;z-index:16;'></div>");
+        $('.fa-check-circle').remove();
+        $('.fa-times-circle').remove();
+
         var form = new FormData($('#platformPost')[0]);
 		if($('#platformTwitter').prop('checked')) form.append("platformTwitter","1");
         else form.append("platformTwitter","0");
@@ -69,9 +75,40 @@ $(document).ready(function(){
             data: form,
             processData: false,
             contentType: false,
-            success: function(result){
+            success: function(result,status) {
                 console.log(result);
-                //location.reload();
+                if($('#platformFacebook').is(':checked')) {
+                    if(result.search('Facebook Successful') > 0  ||  result.search('Post scheduled') > 0)
+                        $('label[for="platformFacebook"]').append("&nbsp<i class='fa fa-check-circle' style='color:limegreen;'></i>");
+                    else
+                        $('label[for="platformFacebook"]').append("&nbsp<i class='fa fa-times-circle' style='color:red;'></i>");
+                }
+                if($('#platformTwitter').is(':checked')) {
+                    if(result.search('Twitter Successful') > 0  ||  result.search('Post scheduled') > 0)
+                        $('label[for="platformTwitter"]').append("&nbsp<i class='fa fa-check-circle' style='color:limegreen;'></i>");
+                    else
+                        $('label[for="platformTwitter"]').append("&nbsp<i class='fa fa-times-circle' style='color:red;'></i>");
+                }
+                if($('#platformInstagram').is(':checked')) {
+                    if(result.search('Instagram Successful') > 0  ||  result.search('Post scheduled') > 0)
+                        $('label[for="platformInstagram"]').append("&nbsp<i class='fa fa-check-circle' style='color:limegreen;'></i>");
+                    else
+                        $('label[for="platformInstagram"]').append("&nbsp<i class='fa fa-times-circle' style='color:red;'></i>");
+                }
+                if($('#platformLinkedin').is(':checked')) {
+                    if(result.search('LinkedIn Successful') > 0  ||  result.search('Post scheduled') > 0)
+                        $('label[for="platformLinkedin"]').append("&nbsp<i class='fa fa-check-circle' style='color:limegreen;'></i>");
+                    else
+                        $('label[for="platformLinkedin"]').append("&nbsp<i class='fa fa-times-circle' style='color:red;'></i>");
+                }
+
+                if(status == "success") {
+                    $('#loader').remove();
+                }
+                else {
+                    $('#loader').remove();
+                    $('#postRow1').before("<div class='col-md-12'><p><i class='fa fa-exclamation-circle'></i>&nbsp;Couldn't post statuses. Please contact administrator at <a href='mailto:mfappsandweb@gmail.com'>mfappsandweb@gmail.com</a></p></div>");
+                }
             }
         });
 	});

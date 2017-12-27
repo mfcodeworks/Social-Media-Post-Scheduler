@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/vendor/autoload.php'; // change path as needed
+require_once 'functions.php';
 
 $fb = new Facebook\Facebook([
   'app_id' => '325572871258177',

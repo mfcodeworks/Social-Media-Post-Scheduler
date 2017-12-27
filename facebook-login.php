@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/vendor/autoload.php'; // change path as needed
+require_once 'functions.php';
 
 $fb = new Facebook\Facebook([
   'app_id' => '325572871258177',
@@ -11,7 +12,6 @@ $fb = new Facebook\Facebook([
 $helper = $fb->getRedirectLoginHelper();
 
 $permissions = ['publish_actions','manage_pages','publish_pages']; // Optional permissions
-//TODO reset callback URI
 $loginUrl = $helper->getLoginUrl((isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]".'/Social-Media-Post-Scheduler/fb-callback.php', $permissions);
 
 header("Location: ".$loginUrl);

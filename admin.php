@@ -5,16 +5,16 @@
     if(isset($error) && $error == "username-taken") {
         alert("Username already taken");
     }
-    include 'scripts/functions.php';
-    //if(!isset($_SESSION["username"])) header("Location: login.php");
+    include 'functions.php';
     loadHead();
     loadNav();
     beginContent();
 ?>
-<div class='col-lg-12'>
+<div class='col-lg-12' style='padding-bottom:35px;'>
 <form action='javascript:void(0)' method='post' style='margin: auto; text-align: center;' id='registerUserForm'>
-    <h1 class='my-4' style='margin: auto; width: 50%; text-align: center;'>Add New User to Group</h1>
-    <h3 style='margin: auto; width: 50%; text-align: center;'>User will be added to your group and given permission to post to your page if they have access to it on their social media profile</h3>
+    <h1 class='my-4' style='margin: auto; width: 50%; text-align: center;'>Add New User</h1>
+    <p style='margin: auto; width: 50%; text-align: center;'>User will be added and given permission to post to pages if they have access to it on their social media profile</p>
+    </br>
     <div class='form-group' style='list-group-item'>
       <label for='regUser'>New Username</label>
       <input type='text' name='regUser' class='form-control' id='regUser'>
