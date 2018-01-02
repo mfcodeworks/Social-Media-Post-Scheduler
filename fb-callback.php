@@ -68,7 +68,18 @@ if (! $accessToken->isLongLived()) {
 
 $_SESSION['fb_access_token'] = (string) $accessToken;
 
-// User is logged in with a long-lived access token.
-// You can redirect them to a members-only page.
-header('Location: index.php');
+if(isset($_SESSION['fb_access_token'])) {
+
+    $values = [
+        'fb_access_token' => (string) $accessToken
+    ];
+    $user = [
+        'id' => getUserID()
+    ];
+    sqlUpdate($values,'users',$user);
+
+    // User is logged in with a long-lived access token.
+    // You can redirect them to a members-only page.
+    headerLocation('index.php');
+}
 ?>

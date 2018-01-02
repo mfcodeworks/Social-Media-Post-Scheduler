@@ -15,11 +15,23 @@
     //Get access token
     $accessToken = $client->getAccessToken($_GET['code']);
     $accessData = json_decode(json_encode($accessToken),true);
+
+    //Save access token
     $_SESSION['li_access_token'] = $accessData['token'];
     $_SESSION['li_access_token_expiresAt'] = $accessData['expiresAt'];
 
     //Redirect
     if(isset($_SESSION['li_access_token']) || $_SESSION['li_access_token'] != '') {
+
+        $values = [
+            'li_access_token' => $accessData['token'],
+            'li_access_token_expiresAt' => $accessData['expiresAt']
+        ];
+        $user = [
+            'id' => getUserID()
+        ];
+        sqlUpdate($values,'users',$user);
+        
         headerLocation('index.php');
     }
 ?>

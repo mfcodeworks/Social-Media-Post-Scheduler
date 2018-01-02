@@ -24,6 +24,14 @@
     $_SESSION['tw_access_token'] = $access_token;
 
     if(isset($_SESSION['tw_access_token'])) {
+        $values = [
+            'tw_oauth_token' => $access_token['oauth_token'],
+            'tw_oauth_token_secret' => $access_token['oauth_token_secret']
+        ];
+        $user = [
+            'id' => getUserID()
+        ];
+        sqlUpdate($values,'users',$user);
         headerLocation("index.php");
     }
 ?>
