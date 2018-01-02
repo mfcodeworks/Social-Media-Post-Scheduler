@@ -6,10 +6,18 @@
     use LinkedIn\AccessToken;
     use LinkedIn\Client;
 
+    extract($_GET);
     loadHead();
     loadNav();
     beginContent();
 
+    if(isset($error)) {
+        if($error == "user-not-enabled") {
+            echo "<div class='col-lg-12' style='margin-top:30px;margin-bottom:-40px;'>
+                    <p style='color:red;' class='text-center'><i class='fa fa-exclamation-circle'></i>&nbsp;User acount not yet enabled, you can link your social accounts while you wait for your account to be activated.</p>
+                </div>";
+        }
+    }
     if(!isset($_SESSION['fb_access_token'])) {
     echo "<div class='col-lg-12' style='padding-top:4em;padding-bottom:4em;'>
             <div class='row'>

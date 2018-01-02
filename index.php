@@ -2,6 +2,7 @@
     session_start();
     include 'functions.php';
     if(!isset($_SESSION['username'])) headerLocation('login.php');
+    else if(!$_SESSION['enabled']) headerLocation('link-social.php?error=user-not-enabled');
 	loadHead();
     loadNav();
     beginContent();
@@ -54,17 +55,17 @@
 					</div>
 					<div class='col-md-9' id='postRow2'>
                 		<div class='form-group'>
-                			<label for='postDate'><i class='fa fa-calendar'></i>&nbsp;Publish Date (Example: 23/12/2017, 14:30)</label>
+                			<label for='postDate'><i class='fa fa-calendar'></i>&nbsp;Publish Date (Example: 23/12/2017, 14:30). Leave blank for immediate posting.</label>
                     		<input type='datetime-local' class='form-control' id='postDate' name='postDate'>
                 		</div>
 					</div>
-					<div class='col-md-3' id='postRow3'>
+					<div class='col-md-3'>
                 		<div class='form-group'>
                 			<label for='postPhoto' class='btn btn-secondary' style='margin-top:2em;'><i class='fa fa-picture-o'></i>&nbsp;Add Photo to Post</label>
                     		<input type='file' class='form-control' id='postPhoto' name='postPhoto' style='display:none;'>
                 		</div>
 					</div>
-                    <div class='col-md-12'>
+                    <div class='col-md-12' id='postRow3'>
                 		<div class='form-group'>
                 			<label for='postTimezone'><i class='fa fa-clock-o'></i>&nbsp;Set Timezone</label>
                     		<select id='postTimezone' name='postTimezone' class='form-control'>

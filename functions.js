@@ -17,7 +17,7 @@ $(document).ready(function(){
     // On selecting Facebook, get place to send
     $('#platformFacebook').change(function() {
         if(this.checked) {
-            $('#postRow3').after("<div class='col-lg-12' id='postRow7'><div class='form-group'><label for='fbPerson' style='margin-top:2em;'><i class='fa fa-user'></i>&nbsp;Facebook ID (For your own profile type 'me', for a Facebook page enter what comes after 'www.facebook.com/' for your Facebook page. e.g. 'mfappsandweb'). Currently Facebook hasn't granted permission for page posting, this will be updated when this ability is available.</label><input type='text' class='form-control' id='fbPerson' name='fbPerson' placeholder='me'></div></div>");
+            $('#postRow3').after("<div class='col-lg-12' id='postRow7'><div class='form-group'><label for='fbPerson'><i class='fa fa-user'></i>&nbsp;Facebook ID (For your own profile type 'me', for a Facebook page enter what comes after 'www.facebook.com/' for your Facebook page. e.g. 'mfappsandweb'). Currently Facebook hasn't granted permission for page posting, this will be updated when this ability is available.</label><input type='text' class='form-control' id='fbPerson' name='fbPerson' placeholder='me'></div></div>");
         }
         else {
             $('#postRow7').remove();
@@ -52,6 +52,7 @@ $(document).ready(function(){
 		}
 	});
 
+
 	// Post content with AJAX
 	$('#platformPost').submit(function(e) {
         e.preventDefault();
@@ -77,31 +78,50 @@ $(document).ready(function(){
             contentType: false,
             success: function(result,status) {
                 console.log(result);
+
+                //Check results
                 if($('#platformFacebook').is(':checked')) {
-                    if(result.search('Facebook Successful') > 0  ||  result.search('Post scheduled') > 0)
+                    if(result.search('Facebook Successful') > -1)
                         $('label[for="platformFacebook"]').append("&nbsp<i class='fa fa-check-circle' style='color:limegreen;'></i>");
+                    else if(result.search('Post scheduled') > -1)
+                        $('label[for="platformFacebook"]').append("&nbsp<i class='fa fa-check-circle' style='color:limegreen;'>&nbsp;Scheduled</i>");
+                    else if(result.search('Facebook Failed') > -1)
+                        $('label[for="platformFacebook"]').append("&nbsp<i class='fa fa-times-circle' style='color:red;'></i>");
                     else
                         $('label[for="platformFacebook"]').append("&nbsp<i class='fa fa-times-circle' style='color:red;'></i>");
                 }
                 if($('#platformTwitter').is(':checked')) {
-                    if(result.search('Twitter Successful') > 0  ||  result.search('Post scheduled') > 0)
+                    if(result.search('Twitter Successful') > -1)
                         $('label[for="platformTwitter"]').append("&nbsp<i class='fa fa-check-circle' style='color:limegreen;'></i>");
+                    else if(result.search('Post scheduled') > -1)
+                        $('label[for="platformTwitter"]').append("&nbsp<i class='fa fa-check-circle' style='color:limegreen;'>&nbsp; Scheduled</i>");
+                    else if(result.search('Twitter Failed') > -1)
+                        $('label[for="platformTwitter"]').append("&nbsp<i class='fa fa-times-circle' style='color:red;'></i>");
                     else
                         $('label[for="platformTwitter"]').append("&nbsp<i class='fa fa-times-circle' style='color:red;'></i>");
                 }
                 if($('#platformInstagram').is(':checked')) {
-                    if(result.search('Instagram Successful') > 0  ||  result.search('Post scheduled') > 0)
+                    if(result.search('Instagram Successful') > -1)
                         $('label[for="platformInstagram"]').append("&nbsp<i class='fa fa-check-circle' style='color:limegreen;'></i>");
+                    else if(result.search('Post scheduled') > -1)
+                        $('label[for="platformInstagram"]').append("&nbsp<i class='fa fa-check-circle' style='color:limegreen;'>&nbsp;Scheduled</i>");
+                    else if(result.search('Instagram Failed') > -1)
+                        $('label[for="platformInstagram"]').append("&nbsp<i class='fa fa-times-circle' style='color:red;'></i>");
                     else
                         $('label[for="platformInstagram"]').append("&nbsp<i class='fa fa-times-circle' style='color:red;'></i>");
                 }
                 if($('#platformLinkedin').is(':checked')) {
-                    if(result.search('LinkedIn Successful') > 0  ||  result.search('Post scheduled') > 0)
+                    if(result.search('LinkedIn Successful') > -1)
                         $('label[for="platformLinkedin"]').append("&nbsp<i class='fa fa-check-circle' style='color:limegreen;'></i>");
+                    else if(result.search('Post scheduled') > -1)
+                        $('label[for="platformLinkedin"]').append("&nbsp<i class='fa fa-check-circle' style='color:limegreen;'>&nbsp;Scheduled</i>");
+                    else if(result.search('LinkedIn Failed') > -1)
+                        $('label[for="platformLinkedin"]').append("&nbsp<i class='fa fa-times-circle' style='color:red;'></i>");
                     else
                         $('label[for="platformLinkedin"]').append("&nbsp<i class='fa fa-times-circle' style='color:red;'></i>");
                 }
 
+                //Check status
                 if(status == "success") {
                     $('#loader').remove();
                 }
@@ -111,39 +131,78 @@ $(document).ready(function(){
                 }
             }
         });
-	});
+        $('#postPhoto').val('');
+    });
 
-    //Register user
-    $('#registerUserForm').submit(function() {
-        $.post('check-user.php',
+    //Handle AJAX errors
+    $('document').ajaxError(function(e,xhr,options) {
+        $('#loader').remove();
+        $('#nav').after("<div class='col-md-12 text-center'><p><i class='fa fa-exclamation-circle'></i>&nbsp;A problem occured. Please contact administrator at <a href='mailto:mfappsandweb@gmail.com'>mfappsandweb@gmail.com</a> and explain what you did before the error occured.</p></div>");
+        err = JSON.stringify(e);
+        $.post('error_log.php',
         {
-            regUser: $('#regUser').val(),
-            regPassword: $('#regPassword').val()
+            error: err
         },
         function(data,status) {
-            console.log(data);
-            if(data == "true") window.location.replace('index.php');
-            else window.location.replace('admin.php?error=username-taken');
+            console.log("Error logged.");
         });
     });
 
+    //Register user
+    $('#registerUserForm').submit(function() {
+        $('.fa-exclamation-circle').remove();
+        if($.trim($('#regUser').val()).length < 1) {
+            $('label[for="regUser"]').before("<i class='fa fa-exclamation-circle' style='color:red;'></i> ");
+        }
+        else if($.trim($('#regEmail').val()).length < 5) {
+            $('label[for="regEmail"]').before("<i class='fa fa-exclamation-circle' style='color:red;'></i> ");
+        }
+        else if($.trim($('#regPassword').val()).length < 1) {
+            $('label[for="regPassword"]').before("<i class='fa fa-exclamation-circle' style='color:red;'></i> ");
+        }
+        else {
+            $.post('check-user.php',
+            {
+                regUser: $('#regUser').val(),
+                regEmail: $('#regEmail').val(),
+                regPassword: $('#regPassword').val()
+            },
+            function(data,status) {
+                console.log(data);
+                if(data == "true") window.location.replace('index.php');
+                else window.location.replace('admin.php?error=username-taken');
+            });
+        }
+    });
+
+    //Logout user
     $('#logoutLink').click(function() {
         $.get('logout.php', function(data,status) {
             if(data == "true") location.reload();
         });
     });
 
+    //Login user
     $('#loginForm').submit(function() {
-        $.post('check-user.php',
-        {
-            username: $('#username').val(),
-            password: $('#password').val()
-        },
-        function(data,status) {
-            console.log(data);
-            if(data == 'true') window.location.replace('index.php');
-            else window.location.replace('login.php?error=login-incorrect');
-        });
+        $('.fa-exclamation-circle').remove();
+        if($.trim($('#username').val()).length < 1) {
+            $('label[for="username"]').before("<i class='fa fa-exclamation-circle' style='color:red;'></i> ");
+        }
+        else if($.trim($('#password').val()).length < 1) {
+            $('label[for="password"]').before("<i class='fa fa-exclamation-circle' style='color:red;'></i> ");
+        }
+        else {
+            $.post('check-user.php',
+            {
+                username: $('#username').val(),
+                password: $('#password').val()
+            },
+            function(data,status) {
+                console.log(data);
+                if(data == 'true') window.location.replace('index.php');
+                else window.location.replace('login.php?error=login-incorrect');
+            });
+        }
     });
 
     //Save LinkedIn Business Choice
