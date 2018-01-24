@@ -1,14 +1,1 @@
-[02-Jan-2018 00:34:26 America/Chicago] PHP Fatal error:  Call to undefined function alert() in /home/nygmaros/mfappsandweb/Social-Media-Post-Scheduler/admin.php on line 6
-[02-Jan-2018 00:37:13 America/Chicago] PHP Fatal error:  Call to undefined function alert() in /home/nygmaros/mfappsandweb/Social-Media-Post-Scheduler/admin.php on line 6
-[02-Jan-2018 15:05:02 Asia/Singapore] PHP Fatal error:  Uncaught exception 'GuzzleHttp\Exception\ClientException' with message 'Client error: `POST https://api.linkedin.com/v1/people/~/shares` resulted in a `400 Bad Request` response:
-{
-  "errorCode": 0,
-  "message": "Do not post duplicate content",
-  "requestId": "IEXTF40WRB",
-  "status": 400,
-  "times (truncated...)
-' in /home/nygmaros/mfappsandweb/Social-Media-Post-Scheduler/vendor/guzzlehttp/guzzle/src/Exception/RequestException.php:113
-Stack trace:
-#0 /home/nygmaros/mfappsandweb/Social-Media-Post-Scheduler/vendor/guzzlehttp/guzzle/src/Middleware.php(65): GuzzleHttp\Exception\RequestException::create(Object(GuzzleHttp\Psr7\Request), Object(GuzzleHttp\Psr7\Response))
-#1 /home/nygmaros/mfappsandweb/Social-Media-Post-Scheduler/vendor/guzzlehttp/promises/src/Promise.php(203): GuzzleHttp\Middleware::GuzzleHttp\{closure}(Object(GuzzleHttp\Psr7\Response))
-#2 /home/nygmaros/mfappsandweb/Social-Media-Post-Scheduler/vendor/guzzlehttp/promises/src/Promise.php(156): GuzzleHttp\Promise\Promise::callHandler(1, Object(Guzzle in /home/nygmaros/mfappsandweb/Social-Media-Post-Scheduler/vendor/zoonman/linkedin-api-php-client/src/Exception.php on line 68
+[02-Jan-2018 15:02:47 Pacific/Midway] Graph returned an error: (#200) Requires either publish_actions permission, or manage_pages and publish_pages as an admin with sufficient administrative permission

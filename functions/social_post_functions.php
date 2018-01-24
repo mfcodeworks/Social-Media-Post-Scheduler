@@ -26,9 +26,11 @@ function postToFacebook($accessToken, $postText, $fbPerson, $pictureLocation = N
         } catch(Facebook\Exceptions\FacebookResponseException $e) {
             echo 'Graph returned an error: ' . $e->getMessage();
             error_log('Graph returned an error: ' . $e->getMessage());
+            return false;
         } catch(Facebook\Exceptions\FacebookSDKException $e) {
             echo 'Facebook SDK returned an error: ' . $e->getMessage();
             error_log('Facebook SDK returned an error: ' . $e->getMessage());
+            return false;
         }
         $graphNode = $response->getGraphNode();
         $fbPerson = $graphNode->getField('id');
@@ -42,9 +44,11 @@ function postToFacebook($accessToken, $postText, $fbPerson, $pictureLocation = N
         } catch(Facebook\Exceptions\FacebookResponseException $e) {
             echo 'Graph returned an error: ' . $e->getMessage();
             error_log('Graph returned an error: ' . $e->getMessage());
+            return false;
         } catch(Facebook\Exceptions\FacebookSDKException $e) {
             echo 'Facebook SDK returned an error: ' . $e->getMessage();
             error_log('Facebook SDK returned an error: ' . $e->getMessage());
+            return false;
         }
         $graphNode = $response->getGraphNode();
         $accessToken = $graphNode->getField('access_token');
@@ -65,9 +69,11 @@ function postToFacebook($accessToken, $postText, $fbPerson, $pictureLocation = N
     } catch(Facebook\Exceptions\FacebookResponseException $e) {
         echo 'Graph returned an error: ' . $e->getMessage();
         error_log('Graph returned an error: ' . $e->getMessage());
+        return false;
     } catch(Facebook\Exceptions\FacebookSDKException $e) {
         echo 'Facebook SDK returned an error: ' . $e->getMessage();
         error_log('Facebook SDK returned an error: ' . $e->getMessage());
+        return false;
     }
     $graphNode = $response->getGraphNode();
     if(isset($graphNode['id']) && $graphNode['id'] != '')
@@ -129,6 +135,7 @@ function postToInstagram($igUser,$igPassword,$igPicLocation,$postText) {
     } catch (\Exception $e) {
         echo "INSTAGRAM API\n\nSomething went wrong: ".$e->getMessage()."\n";
         error_log("INSTAGRAM API\n\nSomething went wrong: ".$e->getMessage()."\n");
+        return false;
     }
 
     try {
@@ -136,6 +143,7 @@ function postToInstagram($igUser,$igPassword,$igPicLocation,$postText) {
     } catch (\Exception $e) {
         echo "INSTAGRAM API\n\nSomething went wrong: ".$e->getMessage()."\n";
         error_log("INSTAGRAM API\n\nSomething went wrong: ".$e->getMessage()."\n");
+        return false;
     }
 
     return true;
@@ -206,31 +214,38 @@ function schedulePost($id) {
     $log = "<html><body>";
 
     if($post['platformFacebook']) {
-
-        $user = sqlGet(['fb_access_token'], 'users', [ 'id' => $post['appUser'] ] );
-        if(!postToFacebook($user['fb_access_token'], $post['postText'], $post['fbPerson'], $post['postPhoto']))
-            $log .= "Couldn't post #$id on Facebook.</br>";
-
+        try {
+            $user = sqlGet(['fb_access_token'], 'users', [ 'id' => $post['appUser'] ] );
+            if(!postToFacebook($user['fb_access_token'], $post['postText'], $post['fbPerson'], $post['postPhoto']))
+                $log .= "Couldn't post #$id on Facebook.</br>";
+        }
+        catch(Exception $e){}
     }
+
     if($post['platformTwitter']) {
-
-        $user = sqlGet(['tw_oauth_token','tw_oauth_token_secret'], 'users', [ 'id' => $post['appUser'] ] );
-        if(!postToTwitter($user['tw_oauth_token'], $user['tw_oauth_token_secret'], $post['postText'], $post['postPhoto']))
-            $log .= "Couldn't post #$id on Twitter.</br>";
-
+        try {
+            $user = sqlGet(['tw_oauth_token','tw_oauth_token_secret'], 'users', [ 'id' => $post['appUser'] ] );
+            if(!postToTwitter($user['tw_oauth_token'], $user['tw_oauth_token_secret'], $post['postText'], $post['postPhoto']))
+                $log .= "Couldn't post #$id on Twitter.</br>";
+        }
+        catch(Exception $e){}
     }
+
     if($post['platformInstagram']) {
-
-        if(!postToInstagram($post['igUser'], $post['igPassword'], $post['postPhoto'], $post['postText']))
-            $log .= "Couldn't post #$id on Instagram.</br>";
-
+        try {
+            if(!postToInstagram($post['igUser'], $post['igPassword'], $post['postPhoto'], $post['postText']))
+                $log .= "Couldn't post #$id on Instagram.</br>";
+        }
+        catch(Exception $e){}
     }
+
     if($post['platformLinkedin']) {
-
-        $user = sqlGet(['li_access_token', 'li_access_token_expiresAt'], 'users', [ 'id' => $post['appUser'] ] );
-        if(!postToLinkedIn($user['li_access_token'], $user['li_access_token_expiresAt'], $post['postText'], $post['appUser'], $post['postPhoto'], $post['linkedin_business']))
-            $log .= "Couldn't post #$id on LinkedIn.</br>";
-
+        try {
+            $user = sqlGet(['li_access_token', 'li_access_token_expiresAt'], 'users', [ 'id' => $post['appUser'] ] );
+            if(!postToLinkedIn($user['li_access_token'], $user['li_access_token_expiresAt'], $post['postText'], $post['appUser'], $post['postPhoto'], $post['linkedin_business']))
+                $log .= "Couldn't post #$id on LinkedIn.</br>";
+        }
+        catch(Exception $e){}
     }
 
     $values = [

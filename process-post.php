@@ -53,18 +53,37 @@
         // Handle new posts
         echo "Posting Now!\n\n";
 
-        if($platformFacebook)
-            if(postToFacebook($_SESSION['fb_access_token'],$postText,$fbPerson,$picLocation)) echo "Facebook Successful\n\n";
-            else echo "Facebook Failed\n\n";
-        if($platformTwitter)
-            if(postToTwitter($_SESSION['tw_access_token']['oauth_token'],$_SESSION['tw_access_token']['oauth_token_secret'],$postText,$picLocation)) echo "Twitter Successful\n\n";
-            else echo "Twitter Failed\n\n";
-        if($platformInstagram)
-            if(postToInstagram($igUser,$igPassword,$picLocation,$postText)) echo "Instagram Successful\n\n";
-            else echo "Instagram Failed\n\n";
-        if($platformLinkedin)
-            if(postToLinkedIn($_SESSION['li_access_token'], $_SESSION['li_access_token_expiresAt'],$postText,$appUser,$picLocation,$_SESSION['linkedin_business'])) echo "LinkedIn Successful\n\n";
-            else echo "LinkedIn Failed\n\n";
+        if($platformFacebook) {
+            try {
+                if(postToFacebook($_SESSION['fb_access_token'],$postText,$fbPerson,$picLocation)) echo "Facebook Successful\n\n";
+                else echo "Facebook Failed\n\n";
+            }
+            catch(Exception $e) {}
+        }
+
+        if($platformTwitter) {
+            try {
+                if(postToTwitter($_SESSION['tw_access_token']['oauth_token'],$_SESSION['tw_access_token']['oauth_token_secret'],$postText,$picLocation)) echo "Twitter Successful\n\n";
+                else echo "Twitter Failed\n\n";
+            }
+            catch(Exception $e) {}
+        }
+
+        if($platformInstagram) {
+            try {
+                if(postToInstagram($igUser,$igPassword,$picLocation,$postText)) echo "Instagram Successful\n\n";
+                else echo "Instagram Failed\n\n";
+            }
+            catch(Exception $e) {}
+        }
+
+        if($platformLinkedin) {
+            try {
+                if(postToLinkedIn($_SESSION['li_access_token'], $_SESSION['li_access_token_expiresAt'],$postText,$appUser,$picLocation,$_SESSION['linkedin_business'])) echo "LinkedIn Successful\n\n";
+                else echo "LinkedIn Failed\n\n";
+            }
+            catch(Exception $e) {}
+        }
 
 
         $values['published'] = '1';
